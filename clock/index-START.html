@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JS + CSS Clock</title>
+  
+<style>
+  html {
+    background: #018DED url(https://unsplash.it/1500/1000?image=881&blur=5);
+    background-size: cover;
+    font-family: 'helvetica neue';
+    text-align: center;
+    font-size: 10px;
+  }
+
+  body {
+    margin: 0;
+    font-size: 2rem;
+    display: flex;
+    flex: 1;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clock {
+    width: 30rem;
+    height: 30rem;
+    border: 20px solid white;
+    border-radius: 50%;
+    margin: 50px auto;
+    padding: 2rem;
+    box-shadow:
+      0 0 0 4px rgba(0, 0, 0, 0.1),
+      inset 0 0 0 3px #EFEFEF,
+      inset 0 0 10px black,
+      0 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .clock-face {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 1px solid gray;
+    /* account for the height of the clock hands */
+  }
+
+  .hand {
+    /*.clock-face 기준*/
+    width: 50%;
+    position: absolute;
+    top: 50%;
+    transform-origin: 100% 50%; /*회전축 정하기*/
+    transform: rotate(90deg); /*초기 세팅*/
+    transition: all 0.05s;
+    transition-timing-function: cubic-bezier(0,1.2,1,1.55);
+  }
+  .second{
+    background-color: white;
+    height: 2px;
+  }
+  .min{
+    background-color: wheat;
+    height: 4px;
+  }
+  .hour{
+    background-color: black;
+    height: 6px;
+  }
+</style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="clock">
+      <div class="clock-face">
+        <div class="hand hour"></div>
+        <div class="hand min"></div>
+        <div class="hand second"></div>
+      </div>
+    </div>
+    <script>
+      const second = document.querySelector(".second");
+      const minutes = document.querySelector('.min');
+      const hours = document.querySelector('.hour');
+
+      const SECOND_DEGREE = 6; /*초당 6도*/
+      const MIN_DEGREE = 6; /*분당 6도, 초당 0.5도*/
+      const HOUR_DEGREE = 30; /*시간당 30도, 분당 0.5도*/
+
+        function setDate() {
+          const date = new Date();
+          const currentSecond = date.getSeconds();
+          const curretnMinutes = date.getMinutes();
+          const curretnHour = date.getHours();
+
+          const secondDegree = 90 + (currentSecond * SECOND_DEGREE);
+          const minDegree = 90 + (curretnMinutes*MIN_DEGREE) + (0.1 * currentSecond);
+          const hourDegree = 90 + (curretnHour * HOUR_DEGREE) + (0.5 * curretnMinutes);
+
+          second.style.transform = `rotate(${secondDegree}deg)`;
+          minutes.style.transform = `rotate(${minDegree}deg)`;
+          hours.style.transform = `rotate(${hourDegree}deg)`;
+        }
+
+        setInterval(setDate, 1000);
+
+    </script>
+</body>
+</html>
