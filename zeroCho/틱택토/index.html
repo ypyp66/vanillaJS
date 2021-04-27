@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>틱택토</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        
+    </style>
+</head>
+
+<body>
+    <!-- <table>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table> -->
+    <script>
+        const body = document.querySelector('body');
+        const $table = document.createElement('table'); //테이블
+        const $result = document.createElement('div'); //결과창
+        const $restart = document.createElement('button');
+        
+        let turn = 'O';
+        let clickable = true;
+        let isEnd = false;
+
+        let rows = []; //답 배열
+        /*
+            [$td, $td, $td],
+            [$td, $td, $td],
+            [$td, $td, $td],
+            이 구조를 만들것임
+
+            00 01 02
+            10 11 12
+            20 21 22
+        */
+
+        const setTable = () => {
+            $table.innerText = '';
+            rows = [];
+            for (let i = 0; i < 3; i++) {
+                const $tr = document.createElement('tr'); //tr생성
+                const cells = [];
+                for (let j = 0; j < 3; j++) {
+                    //tr(행)에 3칸씩 생성
+                    const $td = document.createElement('td');
+                    cells.push($td);
+                    //$td.addEventListener('click', check); //각 칸 마다 클릭시 이벤트 추가해줌
+                    $tr.appendChild($td);
+                }
+                rows.push(cells);
+                $table.addEventListener('click', tdClick);
+                //이벤트 버블링 현상때문에 table에 이벤트 리스너를 걸어도 이벤트가 발생한 td에 적용됨
+                //자식 -> 부모로 이벤트 전달
+                $table.appendChild($tr);
+            }
+            body.appendChild($table);
+        }
+
+        const setButton = () => {
+            if(isEnd){
+                console.log('123123')
+                $restart.classList.remove('invisible');
+                $restart.innerText = '다시하기';
+                $restart.addEventListener('click', init);
+            }
+            
+        }
+        //칸 클릭시 이벤트 함수
+
+        //승부판단
+        const checkWinner = (target) => {
+            console.log(target.innerText);
+            const rowIndex = target.parentNode.rowIndex;
+            const cellIndex = target.cellIndex;
+
+            let winner = false;
+
+            //target의 위치를 기준으로 가로, 세로, 대각선 검사
+            if (
+                rows[rowIndex][0].innerText === turn && rows[rowIndex][1].innerText === turn && rows[rowIndex][2].innerText === turn ||
+                rows[0][cellIndex].innerText === turn && rows[1][cellIndex].innerText === turn && rows[2][cellIndex].innerText === turn ||
+                rows[0][0].innerText === turn && rows[1][1].innerText === turn && rows[2][2].innerText === turn ||
+                rows[0][2].innerText === turn && rows[1][1].innerText === turn && rows[2][0].innerText === turn) {
+                
+                isEnd = true;
+                setButton();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        //무승부 판단
+        const checkDraw = (target) => {
+            let count = 0;
+            let draw = true;
+
+            //빈 칸이 있으면 무승부 판정 못함
+            // rows.forEach((row, rIndex) => {
+            //     row.forEach((cell, cIndex) => {
+            //         if (!cell.textContent) { //빈 칸이 있으면
+            //             draw = false; //draw를 false로
+            //             return;
+            //         }
+
+            //     })
+            // });
+
+            draw = rows.flat().every(cell => cell.innerText); //하나라도 값이 없으면 false
+            if (draw) {
+                isEnd = true;
+                setButton();
+            }
+
+            return draw;
+        }
+
+        const tdClick = (event) => {
+            if(!clickable) {
+                return;
+            }
+            if (event.target.innerText) {
+                //이미 클릭한 태그면 return
+                alert('빈 곳을 클릭해주세요');
+                return;
+            }
+
+            event.target.innerText = turn; //클릭한 태그의 내용을 turn으로 바꿔줌
+            
+            //승부 판단
+            if (checkWinner(event.target)){
+                $result.innerText = `${turn}님이 승리!`;
+                $table.removeEventListener('click', tdClick);
+                return;
+            };
+
+            //무승부 판단
+            if(checkDraw(event.target)){
+                $result.innerText = `무승부`;
+                return;
+            }
+
+            turn = turn === 'O' ? 'X' : 'O' //O였으면 X로, X였으면 O로 바꿔줌
+            clickable = false; //턴 바뀌면 클릭 못하게
+
+            setTimeout(() => {
+                computerTurn();
+                clickable = true;
+            },500)
+        }
+
+        const computerTurn = () => {
+            const emptyCells = rows.flat().filter((cell) => !cell.innerText);
+            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
+            randomCell.innerText = 'X';
+
+            if (checkWinner(randomCell)){
+                $result.innerText = `COM님이 승리!`;
+                
+                return;
+            };
+
+            if (checkDraw(randomCell)) {
+                $result.innerText = `무승부`;
+                return;
+            }
+
+            turn = turn === 'X' ? 'O' : 'X'
+        }
+
+        const reset = () => {
+            body.removeChild(body.childNodes[3]);
+            $restart.classList.add('invisible');
+            $result.innerText = '';
+        }
+
+        const init = () => {
+            reset();
+            setTable();
+            body.appendChild($result);
+            body.appendChild($restart);
+        }
+
+        init();
+        
+    </script>
+</body>
+
+</html>
